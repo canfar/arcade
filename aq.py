@@ -39,6 +39,7 @@ class CADCAlmaClass(AlmaClass):
 
 if __name__ == "__main__":
     from astropy.time import Time
-    oldest_data = Time("2015-01-01 10:00:00", out_subfmt='date')
-    newest_data = Time("2016-12-31 10:00:00", out_subfmt='date')
-    print CADCAlmaClass().query_obsdate_async(oldest_data, newest_data).content
+    oldest_data = Time("2009-01-01 10:00:00", out_subfmt='date')
+    newest_data = Time("2019-12-31 10:00:00", out_subfmt='date')
+    with open('result.vot','wb') as fout:
+       fout.write(CADCAlmaClass().query_obsdate_async(oldest_data, newest_data).content)
