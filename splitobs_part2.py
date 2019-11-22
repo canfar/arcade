@@ -11,6 +11,7 @@
 import numpy as np
 import glob
 from os import path
+import shutil
 
 # This script should be run after running scriptForPI.py to generate calibrated 
 # measurement sets.
