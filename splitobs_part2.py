@@ -1,8 +1,9 @@
 # """This script splits out different observations in a single measurement set based on 
 # name of the fields observed.  Additionally, spectral windows are split if they 
 # correspond to different frequency resolutions (continuum data versus line observations). """
-            
-## This is now a 2-part script.  This is part 2, which runs the splitting, and must be run
+
+## This is now a 2-part script which supercedes the earlier splitobs.py .  
+## This is part 2, which runs the splitting, and must be run
 ## in the same version of CASA as was originally used for the calibration in scriptForPI.py
 ## Part 1 generates the necessary lists of components to be split out, and relies on 
 ## msmd tools which are only available in more recent versions of CASA.
@@ -36,7 +37,7 @@ def split_ms(filename):
     """
     print("Split out observations found in {}".format(filename))
     ms_name = filename.rstrip("ms.split.cal")
-        
+
     # science fields
     #(Newly coded for the new 2part version)
     with open(ms_name+'_scifields.txt') as f:
@@ -45,11 +46,11 @@ def split_ms(filename):
     # all fields
     with open(ms_name+'_allfields.txt') as f:
         field_names = f.read().splitlines()
-        
-    
+
+
     # Loop through each of these fields and split out measurement set    
     for field_name in field_names:
-        
+
         #read in the types of spws (line or continuum) if they exist
         cont_spws=[]
         line_spws=[]
@@ -61,36 +62,54 @@ def split_ms(filename):
         if os.path.exists(ms_name+'_'+field_name+'_linespws.txt'):
                 with open(ms_name+'_'+field_name+'_linespws.txt') as f:
                     line_spws = f.read().splitlines()
-        
+
 
         # if this is in the science target list call it science, else its a calibrator
         obs_type = field_name in sci_field_names and "SCI" or "CAL"
 
 
-        #HK added: split by spw: continuum all goes together, line spws are each separate
+        #HK update, Jan17/20 - continuum is now also split by each spw,
+        # and cont is renamed 'lowres' while line is renamed 'highres'
+
+        #(now outdated) HK added: split by spw: continuum all goes together, line spws are each separate
 
         #Continuum: only run if there are any entries in cont_spws
         if cont_spws:
-            split_cont_dir = "{}.{}.{}.cont.ms.split.cal".format(ms_name, obs_type, field_name)
-            print("Splitting {} into {}".format(field_name, split_cont_dir))
-            # Remove the subdirectory, if it exists
-            shutil.rmtree(split_cont_dir, ignore_errors=True)
-            #split continuum field using casa split command
-            #NB: messy bit directly below is to convert the formatting of cont_spws.  CASA's split 
-            # command needs it to look like this: '0,1,5'  while cont_spws is in a form like this [0,1,5]
-            #   NB: A simple str(cont_spws) does not work because CASA does not like the square braces [ ]  
-            cont_spws_str = ','.join(str(num) for num in cont_spws)
-            split(vis=filename,
-                    outputvis=split_cont_dir,
-                    field=field_name,
-                    datacolumn='data',
-                    spw=cont_spws_str)
+            for spws in cont_spws:
+                split_cont_dir = "{}.{}.{}.lowres_spw{}.ms.split.cal".format(ms_name, obs_type, field_name, spws)
+                print("Splitting {} into {}".format(field_name, split_cont_dir))
+                # Remove the subdirectory, if it exists
+                shutil.rmtree(split_cont_dir, ignore_errors=True)
+                #split continuum field using casa split command
+                #NB: all of the following lines with double comment signs are
+                # the necessary coding if the continuum/TDM spws are bundled
+                # together into a single file.  We are no longer doing that,
+                # but since it was a more complicated process to code, the
+                # commands are left here in case there is ever a desire to
+                # revert to that method.  In case of reversion, note that the
+                # 'for spws' line above should be eliminated, and the naming 
+                # structure for split_cont_dir should remove the _spw{} 
+                # component.
+                ##NB: messy bit directly below is to convert the formatting of cont_spws.  CASA's split 
+                ## command needs it to look like this: '0,1,5'  while cont_spws is in a form like this [0,1,5]
+                ##   NB: A simple str(cont_spws) does not work because CASA does not like the square braces [ ]  
+                ##cont_spws_str = ','.join(str(num) for num in cont_spws)
+                ##split(vis=filename,
+                ##        outputvis=split_cont_dir,
+                ##        field=field_name,
+                ##        datacolumn='data',
+                ##        spw=cont_spws_str)
+                split(vis=filename,
+                        outputvis=split_cont_dir,
+                        field=field_name,
+                        datacolumn='data',
+                        spw=str(spws))
 
         #line spws: one at a time (and only if there are any entries in line_spws)
         if line_spws:
             for spws in line_spws:
                 #define name & delete if already exists
-                split_line_dir = "{}.{}.{}.line_spw{}.ms.split.cal".format(ms_name, obs_type, field_name,spws)
+                split_line_dir = "{}.{}.{}.highres_spw{}.ms.split.cal".format(ms_name, obs_type, field_name,spws)
                 print("Splitting {} into {}".format(field_name, split_line_dir))
                 shutil.rmtree(split_line_dir, ignore_errors=True)
                 #run the split
@@ -105,11 +124,11 @@ def split_ms(filename):
     #Final step: remove the txt files associated with this dataset (only)
     os.system('rm -f '+ms_name+'*fields.txt')
     os.system('rm -f '+ms_name+'*spws.txt')
-        
+
     #end of HK adds to the splitting by spw component
 
-        
-            
+
+
 if __name__ == "__main__":
     BASE_FILENAME = "*.ms.split.cal" # Types of files to process
     for filename in glob.glob(BASE_FILENAME):
