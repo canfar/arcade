@@ -2,7 +2,8 @@
 # name of the fields observed.  Additionally, spectral windows are split if they 
 # correspond to different frequency resolutions (continuum data versus line observations). """
 
-## This is now a 2-part script.  This is part 1, which uses the msmd tools (only available in
+## This is now a 2-part script which supercedes the original splitobs.py .  
+## This is part 1, which uses the msmd tools (only available in
 ## more recent versions of CASA) to identify the appropriate components for the splitting.
 ## Part 2 actually runs the splitting, and must be run in the same version of CASA as was
 ## originally used for the calibration in scriptForPI.py
@@ -41,8 +42,8 @@ def split_ms_name(filename):
     #   Note that all science fields have the observing intent 'OBSERVE_TARGET'
     #   All calibrator fields have observing intents of 'CALIBRATE*', however,
     #   sometimes the science fields also have these observing intents
-    #   included (e.g., CALIBRATE_WVR)	
-        
+    #   included (e.g., CALIBRATE_WVR)  
+
     # Identify science fields
     # Note that sometimes have multiple field numbers for the same field name
     sci_field_names = list(np.unique(msmd.fieldsforintent("OBSERVE_TARGET*",True)))
@@ -51,7 +52,7 @@ def split_ms_name(filename):
     with open(ms_name+'_scifields.txt', 'w') as f:
         for item in sci_field_names:
             f.write("%s\n" % item)
-        
+
     # Get list of all fields (likely msmd.fields could provide a complete list but
     # here we take the calibrate list and append the science target list)
     field_names = list(np.unique(msmd.fieldsforintent('CALIBRATE*',True)))
@@ -68,12 +69,12 @@ def split_ms_name(filename):
     # HK added the comment sign below (Aug20/19).  Need to be able to still access the metadata when looping
     # on the individual field names for the Nchan determination below
     # msmd.done()
-    
+
     # Loop through each of these fields and split out measurement set    
     for field_name in field_names:
         # HK added (Aug20/19): determine the number of channels per spectral window.
-        # If Nchan is 128, that spectral window is in continuum mode. 
-        # Nchan > 128 implies a spectral line observation.
+        # If Nchan is 128, that spectral window is in TDM/continuum mode. 
+        # Nchan > 128 implies a spectral line observation (FDM mode).
         # We want to keep all 'spw's with Nchan=128 as a single entity, and separate 
         # each spw with Nchan>128 as an independent file
         spws_field = list(np.unique(msmd.spwsforfield(field_name))) #this gives the spw #s for this field name
@@ -83,7 +84,7 @@ def split_ms_name(filename):
         for spws in spws_field:
             spws_Nchan = msmd.nchan(spws)
             #if 128, add spw to continuum array, otherwise, to line array
-            if spws_Nchan == 128: 
+            if spws_Nchan == 128:
                 cont_spws.append(spws)
             else:
                 line_spws.append(spws)
@@ -103,11 +104,11 @@ def split_ms_name(filename):
             with open(ms_name+'_'+field_name+'_linespws.txt','w') as f:
                 for item in line_spws:
                     f.write("%s\n" % item)
-        
 
-        
+
+
 msmd.done()  #HK added -- this line is moved from above, as it is now used a little later in the code 
-            
+
 if __name__ == "__main__":
     BASE_FILENAME = "*.ms.split.cal" # Types of files to process
     for filename in glob.glob(BASE_FILENAME):
