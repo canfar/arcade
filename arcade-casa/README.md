@@ -4,16 +4,16 @@ The source of ARCADE CASA containers and their build recipes are contained in th
 
 This document describes how to modify existing CASA containers and add new CASA containers to ARCADE.
 
-Please refer to the [skaha](https://github.com/opencadc/skaha/tree/master/skaha-containers) repository for details of the requirements for  running containers in skaha.
+Please refer to the [skaha](https://github.com/opencadc/skaha/tree/master/skaha-containers) repository for details of the requirements for running containers in the skaha ARCADE desktop environment.
 
 ## Modifying a CASA container
 
 To modify a CASA container is to modify the Dockerfile of a given version of CASA.  To make a modification, one would follow these steps:
-1. fork the opencadc/skaha.git project
+1. fork this github repository
 1. make the desired modifications to a CASA container in your fork
-1. build a new image with the modifications
-1. test the new image (more below)
-1. when satisfied, issue a pull request to opencadc/skaha.git
+1. build a new container image with the modifications
+1. test the new container image (more below)
+1. when satisfied, issue a pull request to this github repository
 
 To build CASA containers in a given version set, follow these steps:
 
@@ -21,7 +21,7 @@ To build CASA containers in a given version set, follow these steps:
 1. execute `make`
 
 ## Creating a new CASA container
-Creating a new version of a casa container follows the same process as modifying an existing CASA container, except that a new set of build instructions (Dockerfile, etc) are created and added to the forked opencadc/skaha.git repository.
+Creating a new version of a casa container follows the same process as modifying an existing CASA container, except that a new set of build instructions (Dockerfile, etc) are created and added to the forked canfar/arcade.git repository.
 
 ## Publishing
 CASA images are published in the skaha user image registry.  Details on this registry are described in the [skaha container](https://github.com/opencadc/skaha/tree/master/skaha-containers "skaha") section in opencadc/skaha.git.
