@@ -116,11 +116,11 @@ Now we can mount the file system locally using the following command, based on w
 
 #### On Ubuntu/Debian
 
-`sshfs -o port=64022 {your_cadc_username}@proto.canfar.net:/ $HOME/mnt/cavern`
+`sshfs -o port=64022 {your_cadc_username}@ws-uv.canfar.net:/ $HOME/mnt/cavern`
 
 #### On Mac OSX
 
-`sshfs -o port=64022,defer_permissions {your_cadc_username}@proto.canfar.net:/ $HOME/mnt/cavern`
+`sshfs -o port=64022,defer_permissions {your_cadc_username}@ws-uv.canfar.net:/ $HOME/mnt/cavern`
 
 The `defer_permissions` option works around issues with OSX permission handling. See [here](https://github.com/osxfuse/osxfuse/wiki/Mount-options#default_permissions-and-defer_permissions) for more details.
 
